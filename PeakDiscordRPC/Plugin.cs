@@ -1,6 +1,6 @@
-﻿using BepInEx;
+﻿using System;
+using BepInEx;
 using BepInEx.Logging;
-using DiscordRPC;
 using HarmonyLib;
 
 namespace PeakDiscordRPC;
@@ -8,6 +8,8 @@ namespace PeakDiscordRPC;
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 public class Plugin : BaseUnityPlugin
 {
+    private float _lastRPCUpdateTime;
+
     private static Plugin Instance;
 
     internal static ManualLogSource LOG => Instance.Logger;
@@ -28,5 +30,14 @@ public class Plugin : BaseUnityPlugin
         LOG.LogInfo($"{MyPluginInfo.PLUGIN_NAME} {MyPluginInfo.PLUGIN_VERSION} has methods patched.");
 
         DiscordRichPresence.Initialize();
+    }
+
+    private void Update()
+    {
+        if (UnityEngine.Time.time - _lastRPCUpdateTime < 1f)
+            return;
+
+        _lastRPCUpdateTime = UnityEngine.Time.time;
+        DiscordRichPresence.PresenceUpdate();
     }
 }
