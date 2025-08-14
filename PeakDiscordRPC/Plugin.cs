@@ -8,7 +8,7 @@ namespace PeakDiscordRPC;
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 public class Plugin : BaseUnityPlugin
 {
-    public static Plugin Instance;
+    private static Plugin Instance;
 
     internal static ManualLogSource LOG => Instance.Logger;
 
@@ -27,6 +27,6 @@ public class Plugin : BaseUnityPlugin
 
         LOG.LogInfo($"{MyPluginInfo.PLUGIN_NAME} {MyPluginInfo.PLUGIN_VERSION} has methods patched.");
 
-        DiscordRichPresence.Initialize("1404923560647987310");
+        DiscordRichPresence.Initialize();
     }
 }
