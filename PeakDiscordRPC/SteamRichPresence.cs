@@ -6,10 +6,30 @@ namespace mod;
 [HarmonyPatch(typeof(RichPresenceService), "SetState")]
 public class SteamRichPresence
 {
+
     static bool Prefix(RichPresenceState state)
     {
+        Plugin.isInGame = CheckIsRunBiome(state);
         DiscordRichPresence.SetState(GetStateString(state));
+
         return true;
+    }
+
+    static bool CheckIsRunBiome(RichPresenceState state)
+    {
+        switch (state)
+        {
+            case RichPresenceState.Status_Shore:
+            case RichPresenceState.Status_Tropics:
+            case RichPresenceState.Status_Alpine:
+            case RichPresenceState.Status_Mesa:
+            case RichPresenceState.Status_Caldera:
+            case RichPresenceState.Status_Kiln:
+            case RichPresenceState.Status_Peak:
+                return true;
+            default:
+                return false;
+        }
     }
 
     static string GetStateString(RichPresenceState state)

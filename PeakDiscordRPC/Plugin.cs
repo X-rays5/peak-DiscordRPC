@@ -14,6 +14,8 @@ public class Plugin : BaseUnityPlugin
 
     private Harmony _harmony;
 
+    public static bool isInGame = false;
+
     private void Awake()
     {
         Instance = this;
