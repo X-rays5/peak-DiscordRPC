@@ -26,13 +26,17 @@ public static class DiscordRichPresence
         {
             if (_client != null) return;
 
+            Plugin.LOG.LogInfo("Initializing DiscordRPC client.");
             _client = new DiscordRpcClient("1404923560647987310");
             _client.OnReady += (sender, e) =>
             {
                 Plugin.LOG.LogInfo($"Connected to Discord as {e.User.Username}");
+                PresenceUpdate();
             };
 
             _client.OnError += (sender, e) => { Plugin.LOG.LogError($"Discord RPC Error: {e.Message}"); };
+
+            _client.Initialize();
         }
     }
 
@@ -68,11 +72,11 @@ public static class DiscordRichPresence
                 LargeImageText = LargeImageText,
                 LargeImageUrl = LargeImageUrl,
                 SmallImageKey = DifficultyImageKey(Ascents.currentAscent),
-                SmallImageText = $"Ascent: {Ascents.currentAscent.ToString()}"
+                SmallImageText = DifficultyImageText(Ascents.currentAscent)
             },
             Party = new Party
             {
-                ID = PhotonNetwork.OfflineMode ? string.Empty : PartyId,
+                ID = GetPartyId(),
                 Privacy = Party.PrivacySetting.Private,
                 Size = GetPartySize(),
                 Max = GetPartyMaxSize(),
@@ -92,6 +96,49 @@ public static class DiscordRichPresence
         }
     }
 
+    private static string DifficultyImageKey(int ascentLevel)
+    {
+        if (!Plugin.isInGame)
+        {
+            return "bing-bong"; // Default image key when not in game
+        }
+
+        if (ascentLevel >= 0 && ascentLevel <= 7)
+        {
+            // Ascent levels are 0-7, so we can use them directly to form the image key
+            Plugin.LOG.LogInfo($"Difficulty image key: difficulty-ascent{ascentLevel}");
+            return $"difficulty-ascent{ascentLevel}";
+        }
+
+        Plugin.LOG.LogWarning($"Invalid ascent level: {ascentLevel}. Defaulting to 'bing-bong'.");
+        return "bing-bong";
+    }
+
+    private static string DifficultyImageText(int ascentLevel)
+    {
+        if (!Plugin.isInGame)
+        {
+            return "Not in game"; // Default text when not in game
+        }
+
+        if (ascentLevel >= 1 && ascentLevel <= 7)
+        {
+            return $"Ascent Level: {ascentLevel}";
+        }
+
+        if (ascentLevel == 0)
+        {
+            return "Difficulty: Peak";
+        }
+
+        if (ascentLevel == -1)
+        {
+            return "Difficulty: Tenderfoot";
+        }
+
+        return string.Empty;
+    }
+
     private static string GetStateString()
     {
         var day = "";
@@ -101,6 +148,31 @@ public static class DiscordRichPresence
         }
 
         return $"{_state}{day}";
+    }
+
+    private static string GetDetailsString()
+    {
+        if (!Plugin.isInGame || Character.localCharacter == null)
+        {
+            return "";
+        }
+
+        return Character.localCharacter.data.fullyPassedOut ? Character.localCharacter.data.dead ? DeadState : PassedOutState : AliveState;
+    }
+
+    private static string GetPartyId()
+    {
+        if (PhotonNetwork.OfflineMode)
+        {
+            return string.Empty;
+        }
+
+        if (PhotonNetwork.CurrentRoom != null && PhotonNetwork.CurrentRoom.Name != null)
+        {
+            return PartyId;
+        }
+
+        return string.Empty;
     }
 
     private static int GetPartySize()
@@ -135,25 +207,5 @@ public static class DiscordRichPresence
 
         // Default to 4 players if no room is available
         return 4;
-    }
-
-    private static string DifficultyImageKey(int ascentLevel)
-    {
-        if (ascentLevel >= 0 && ascentLevel <= 7)
-        {
-            return $"difficulty-ascent{ascentLevel}";
-        }
-
-        return "bing-bong";
-    }
-
-    private static string GetDetailsString()
-    {
-        if (!Plugin.isInGame || Character.localCharacter == null)
-        {
-            return "";
-        }
-
-        return Character.localCharacter.data.fullyPassedOut ? Character.localCharacter.data.dead ? DeadState : PassedOutState : AliveState;
     }
 }
