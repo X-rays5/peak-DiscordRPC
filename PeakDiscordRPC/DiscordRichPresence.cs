@@ -123,10 +123,10 @@ public static class DiscordRichPresence
             return "";
         }
 
-        if (Character.localCharacter.data.fullyPassedOut) {
-            return PassedOutState;
-        } else if (Character.localCharacter.data.dead) {
+        if (Character.localCharacter.data.dead) {
             return DeadState;
+        } else if (Character.localCharacter.data.fullyPassedOut) {
+            return PassedOutState;
         }
 
         return AliveState;
