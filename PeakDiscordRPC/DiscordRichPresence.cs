@@ -188,7 +188,7 @@ public static class DiscordRichPresence
 
     private static string GetPartyId()
     {
-        if (PhotonNetwork.OfflineMode)
+        if (Plugin.IsInMenu)
         {
             return string.Empty;
         }
