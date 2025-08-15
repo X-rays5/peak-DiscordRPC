@@ -29,13 +29,16 @@ public static class DiscordRichPresence
 
             Plugin.LOG.LogInfo("Initializing DiscordRPC client.");
             _client = new DiscordRpcClient("1404923560647987310");
-            _client.OnReady += (sender, e) =>
+            _client.OnReady += (_, e) =>
             {
                 Plugin.LOG.LogInfo($"Connected to Discord as {e.User.Username}");
                 PresenceUpdate();
             };
 
-            _client.OnError += (sender, e) => { Plugin.LOG.LogError($"Discord RPC Error: {e.Message}"); };
+            _client.OnError += (_, e) =>
+            {
+                Plugin.LOG.LogError($"Discord RPC Error: {e.Message}");
+            };
 
             _client.Initialize();
         }
@@ -105,7 +108,7 @@ public static class DiscordRichPresence
     private static string GetStateString()
     {
         var day = "";
-        if (Plugin.isInGame && Character.localCharacter != null)
+        if (Plugin.IsInGame && Character.localCharacter != null)
         {
             day = $" - Day: {DayNightManager.instance.dayCount}";
         }
@@ -115,7 +118,7 @@ public static class DiscordRichPresence
 
     private static string GetDetailsString()
     {
-        if (!Plugin.isInGame || Character.localCharacter == null)
+        if (!Plugin.IsInGame || Character.localCharacter == null)
         {
             return "";
         }
@@ -131,7 +134,7 @@ public static class DiscordRichPresence
 
     private static ulong GetGameStartTimeStamp()
     {
-        if (!Plugin.isInGame || RunManager.Instance == null)
+        if (!Plugin.IsInGame || RunManager.Instance == null)
         {
             return (ulong)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() - Time.realtimeSinceStartup);
         }
@@ -142,43 +145,45 @@ public static class DiscordRichPresence
 
     private static string DifficultyImageKey(int ascentLevel)
     {
-        if (!Plugin.isInGame)
-        {
-            return "bing-bong"; // Default image key when not in game
-        }
+        if (!Plugin.IsInGame)
+            return "bing-bong";
 
         if (ascentLevel >= 0 && ascentLevel <= 7)
-        {
-            // Ascent levels are 0-7, so we can use them directly to form the image key
             return $"difficulty-ascent{ascentLevel}";
-        }
 
         return "bing-bong";
     }
 
     private static string DifficultyImageText(int ascentLevel)
     {
-        if (!Plugin.isInGame)
+        if (!Plugin.IsInGame)
         {
             return "Not in a game";
         }
 
-        if (ascentLevel >= 1 && ascentLevel <= 7)
+        switch (ascentLevel)
         {
-            return $"Ascent Level: {ascentLevel}";
+            case 0:
+                return "Peak Difficulty";
+            case -1:
+                return "Tenderfoot";
+            case 1:
+                return "Ascent Level 1";
+            case 2:
+                return "Ascent Level 2";
+            case 3:
+                return "Ascent Level 3";
+            case 4:
+                return "Ascent Level 4";
+            case 5:
+                return "Ascent Level 5";
+            case 6:
+                return "Ascent Level 6";
+            case 7:
+                return "Ascent Level 7";
+            default:
+                return string.Empty;
         }
-
-        if (ascentLevel == 0)
-        {
-            return "Difficulty: Peak";
-        }
-
-        if (ascentLevel == -1)
-        {
-            return "Difficulty: Tenderfoot";
-        }
-
-        return string.Empty;
     }
 
     private static string GetPartyId()
@@ -190,21 +195,21 @@ public static class DiscordRichPresence
 
         if (PhotonNetwork.CurrentRoom != null)
         {
-            return PartyId;
+            return PhotonNetwork.CurrentRoom.Name;
         }
 
-        return string.Empty;
+        return PartyId;
     }
 
     private static int GetPartySize()
     {
-        if (PhotonNetwork.OfflineMode)
+        if (PhotonNetwork.OfflineMode || PhotonNetwork.CurrentRoom == null)
         {
             // In offline mode, we assume the player is alone
             return 1;
         }
 
-        if (PhotonNetwork.CurrentRoom != null && PhotonNetwork.CurrentRoom.PlayerCount > 0)
+        if (PhotonNetwork.CurrentRoom.PlayerCount > 0)
         {
             return PhotonNetwork.CurrentRoom.PlayerCount;
         }
@@ -215,12 +220,12 @@ public static class DiscordRichPresence
 
     private static int GetPartyMaxSize()
     {
-        if (PhotonNetwork.OfflineMode)
+        if (PhotonNetwork.OfflineMode || PhotonNetwork.CurrentRoom == null)
         {
             return 1;
         }
 
-        if (PhotonNetwork.CurrentRoom != null && PhotonNetwork.CurrentRoom.MaxPlayers > 0)
+        if (PhotonNetwork.CurrentRoom.MaxPlayers > 0)
         {
             // For some reason, the max players count is one higher than the actual max players in the room
             return PhotonNetwork.CurrentRoom.MaxPlayers - 1;

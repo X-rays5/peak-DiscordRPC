@@ -1,5 +1,4 @@
-﻿using System;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 
@@ -10,17 +9,17 @@ public class Plugin : BaseUnityPlugin
 {
     private float _lastRPCUpdateTime;
 
-    private static Plugin Instance;
+    private static Plugin _instance;
 
-    internal static ManualLogSource LOG => Instance.Logger;
+    internal static ManualLogSource LOG => _instance.Logger;
 
     private Harmony _harmony;
 
-    public static bool isInGame = false;
+    public static bool IsInGame = false;
 
     private void Awake()
     {
-        Instance = this;
+        _instance = this;
 
         LOG.LogInfo($"{MyPluginInfo.PLUGIN_NAME} {MyPluginInfo.PLUGIN_VERSION} is starting...");
 

@@ -9,7 +9,7 @@ public class SteamRichPresence
 
     static bool Prefix(RichPresenceState state)
     {
-        Plugin.isInGame = CheckIsRunBiome(state);
+        Plugin.IsInGame = CheckIsRunBiome(state);
         DiscordRichPresence.SetState(GetStateString(state));
 
         return true;
