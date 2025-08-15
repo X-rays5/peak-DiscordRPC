@@ -1,0 +1,64 @@
+name: Build
+
+on:
+  push:
+    branches: 
+        - main
+        - ci
+    tags:
+      - 'v*'
+  pull_request:
+    branches: 
+        - main
+  workflow_dispatch: null
+  
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+          fetch-depth: 0
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    
+    - name: Create artifact directory and copy files
+      run: |
+        mkdir artifacts
+        Copy-Item 'PeakDiscordRPC/bin/Release/net48/PeakDiscordRPC.dll' -Destination 'artifacts'
+        Copy-Item 'PeakDiscordRPC/bin/Release/net48/Newtonsoft.Json.dll' -Destination 'artifacts'
+        Copy-Item 'PeakDiscordRPC/bin/Release/net48/DiscordRPC.dll' -Destination 'artifacts'
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Build Artifacts
+        path: artifacts/
+        retention-days: 14
+
+    - name: Create GitHub Release
+      if: startsWith(github.ref, 'refs/tags/')
+      id: create-release
+      uses: softprops/action-gh-release@v2
+      with:
+        name: Release ${{ github.ref_name }}
+        body: This is a new release based on the tag `${{ github.ref_name }}`.
+        files: artifacts/**
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
