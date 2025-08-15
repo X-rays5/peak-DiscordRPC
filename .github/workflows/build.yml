@@ -44,11 +44,15 @@ jobs:
         Copy-Item 'PeakDiscordRPC/bin/Release/net48/Newtonsoft.Json.dll' -Destination 'artifacts'
         Copy-Item 'PeakDiscordRPC/bin/Release/net48/DiscordRPC.dll' -Destination 'artifacts'
 
+    - name: Compress artifacts into a zip file
+      run: |
+        Compress-Archive -Path artifacts/* -DestinationPath PeakDiscordRPC.zip
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: Build Artifacts
-        path: artifacts/
+        path: PeakDiscordRPC.zip
         retention-days: 14
 
     - name: Create GitHub Release
@@ -58,6 +62,6 @@ jobs:
       with:
         name: Release ${{ github.ref_name }}
         body: This is a new release based on the tag `${{ github.ref_name }}`.
-        files: artifacts/**
+        files: PeakDiscordRPC.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
