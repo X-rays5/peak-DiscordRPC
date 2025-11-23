@@ -108,7 +108,7 @@ public static class DiscordRichPresence
     private static string GetStateString()
     {
         var day = "";
-        if (Plugin.IsInGame && Character.localCharacter != null)
+        if (Plugin.IsInGame && Character.localCharacter)
         {
             day = $" - Day: {DayNightManager.instance.dayCount}";
         }
@@ -118,7 +118,7 @@ public static class DiscordRichPresence
 
     private static string GetDetailsString()
     {
-        if (!Plugin.IsInGame || Character.localCharacter == null)
+        if (!Plugin.IsInGame || !Character.localCharacter)
         {
             return "";
         }
@@ -134,7 +134,7 @@ public static class DiscordRichPresence
 
     private static ulong GetGameStartTimeStamp()
     {
-        if (!Plugin.IsInGame || RunManager.Instance == null)
+        if (!Plugin.IsInGame || !RunManager.Instance)
         {
             return (ulong)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() - Time.realtimeSinceStartup);
         }
@@ -148,10 +148,7 @@ public static class DiscordRichPresence
         if (!Plugin.IsInGame)
             return "bing-bong";
 
-        if (ascentLevel >= 0 && ascentLevel <= 7)
-            return $"difficulty-ascent{ascentLevel}";
-
-        return "bing-bong";
+        return ascentLevel is >= 0 and <= 7 ? $"difficulty-ascent{ascentLevel}" : "bing-bong";
     }
 
     private static string DifficultyImageText(int ascentLevel)
@@ -161,29 +158,19 @@ public static class DiscordRichPresence
             return "Not in a game";
         }
 
-        switch (ascentLevel)
+        return ascentLevel switch
         {
-            case 0:
-                return "Peak Difficulty";
-            case -1:
-                return "Tenderfoot";
-            case 1:
-                return "Ascent Level 1";
-            case 2:
-                return "Ascent Level 2";
-            case 3:
-                return "Ascent Level 3";
-            case 4:
-                return "Ascent Level 4";
-            case 5:
-                return "Ascent Level 5";
-            case 6:
-                return "Ascent Level 6";
-            case 7:
-                return "Ascent Level 7";
-            default:
-                return string.Empty;
-        }
+            0 => "Peak Difficulty",
+            -1 => "Tenderfoot",
+            1 => "Ascent Level 1",
+            2 => "Ascent Level 2",
+            3 => "Ascent Level 3",
+            4 => "Ascent Level 4",
+            5 => "Ascent Level 5",
+            6 => "Ascent Level 6",
+            7 => "Ascent Level 7",
+            _ => string.Empty
+        };
     }
 
     private static string GetPartyId()
@@ -193,12 +180,7 @@ public static class DiscordRichPresence
             return string.Empty;
         }
 
-        if (PhotonNetwork.CurrentRoom != null)
-        {
-            return PhotonNetwork.CurrentRoom.Name;
-        }
-
-        return PartyId;
+        return PhotonNetwork.CurrentRoom != null ? PhotonNetwork.CurrentRoom.Name : PartyId;
     }
 
     private static int GetPartySize()
@@ -209,13 +191,7 @@ public static class DiscordRichPresence
             return 1;
         }
 
-        if (PhotonNetwork.CurrentRoom.PlayerCount > 0)
-        {
-            return PhotonNetwork.CurrentRoom.PlayerCount;
-        }
-
-        // Default to 1 player if no room is available. The user must be offline?
-        return 1;
+        return PhotonNetwork.CurrentRoom.PlayerCount > 0 ? PhotonNetwork.CurrentRoom.PlayerCount : 1; // Default to 1 player if no room is available. The user must be offline?
     }
 
     private static int GetPartyMaxSize()

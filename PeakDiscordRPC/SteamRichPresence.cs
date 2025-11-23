@@ -16,7 +16,7 @@ public class SteamRichPresence
         return true;
     }
 
-    static bool CheckIsRunBiome(RichPresenceState state)
+    private static bool CheckIsRunBiome(RichPresenceState state)
     {
         switch (state)
         {
@@ -28,12 +28,14 @@ public class SteamRichPresence
             case RichPresenceState.Status_Kiln:
             case RichPresenceState.Status_Peak:
                 return true;
+            case RichPresenceState.Status_MainMenu:
+            case RichPresenceState.Status_Airport:
             default:
                 return false;
         }
     }
 
-    static string GetStateString(RichPresenceState state)
+    private static string GetStateString(RichPresenceState state)
     {
         return state switch
         {
