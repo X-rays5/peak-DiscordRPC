@@ -27,6 +27,7 @@ public class SteamRichPresence
             case RichPresenceState.Status_Caldera:
             case RichPresenceState.Status_Kiln:
             case RichPresenceState.Status_Peak:
+            case RichPresenceState.Status_Roots:
                 return true;
             case RichPresenceState.Status_MainMenu:
             case RichPresenceState.Status_Airport:
@@ -48,6 +49,7 @@ public class SteamRichPresence
             RichPresenceState.Status_Caldera => "Exploring the Caldera",
             RichPresenceState.Status_Kiln => "Exploring the Kiln",
             RichPresenceState.Status_Peak => "On the Peak",
+            RichPresenceState.Status_Roots => "Exploring the Roots",
             _ => "Lost..."
         };
     }
